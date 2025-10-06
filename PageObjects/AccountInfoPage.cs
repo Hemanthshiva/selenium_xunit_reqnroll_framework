@@ -1,4 +1,3 @@
-// ...existing code...
 // Page Object for Account Information Page
 using OpenQA.Selenium;
 
@@ -36,8 +35,30 @@ namespace selenium_xunit_reqnroll_framework.PageObjects
             new OpenQA.Selenium.Support.UI.SelectElement(Driver.FindElement(monthDropdown)).SelectByText(month);
             new OpenQA.Selenium.Support.UI.SelectElement(Driver.FindElement(yearDropdown)).SelectByText(year);
         }
-        public void SelectNewsletter() => Driver.FindElement(newsletterCheckbox).Click();
-        public void SelectOffers() => Driver.FindElement(offersCheckbox).Click();
+        public void SelectNewsletter()
+        {
+            var element = Driver.FindElement(newsletterCheckbox);
+            try
+            {
+                element.Click();
+            }
+            catch (ElementClickInterceptedException)
+            {
+                ((IJavaScriptExecutor)Driver).ExecuteScript("arguments[0].click();", element);
+            }
+        }
+        public void SelectOffers()
+        {
+            var element = Driver.FindElement(offersCheckbox);
+            try
+            {
+                element.Click();
+            }
+            catch (ElementClickInterceptedException)
+            {
+                ((IJavaScriptExecutor)Driver).ExecuteScript("arguments[0].click();", element);
+            }
+        }
         public void FillAddressInfo(string firstName, string lastName, string company, string address1, string address2, string country, string state, string city, string zipcode, string mobile)
         {
             Driver.FindElement(firstNameInput).SendKeys(firstName);
@@ -45,12 +66,40 @@ namespace selenium_xunit_reqnroll_framework.PageObjects
             Driver.FindElement(companyInput).SendKeys(company);
             Driver.FindElement(address1Input).SendKeys(address1);
             Driver.FindElement(address2Input).SendKeys(address2);
-            new OpenQA.Selenium.Support.UI.SelectElement(Driver.FindElement(countryDropdown)).SelectByText(country);
+            var countryElement = Driver.FindElement(countryDropdown);
+            try
+            {
+                new OpenQA.Selenium.Support.UI.SelectElement(countryElement).SelectByText(country);
+            }
+            catch (ElementClickInterceptedException)
+            {
+                ((IJavaScriptExecutor)Driver).ExecuteScript("arguments[0].scrollIntoView(true);", countryElement);
+                try
+                {
+                    countryElement.Click();
+                }
+                catch (ElementClickInterceptedException)
+                {
+                    ((IJavaScriptExecutor)Driver).ExecuteScript("arguments[0].click();", countryElement);
+                }
+                new OpenQA.Selenium.Support.UI.SelectElement(countryElement).SelectByText(country);
+            }
             Driver.FindElement(stateInput).SendKeys(state);
             Driver.FindElement(cityInput).SendKeys(city);
             Driver.FindElement(zipcodeInput).SendKeys(zipcode);
             Driver.FindElement(mobileNumberInput).SendKeys(mobile);
         }
-        public void ClickCreateAccount() => Driver.FindElement(createAccountButton).Click();
+        public void ClickCreateAccount()
+        {
+            var element = Driver.FindElement(createAccountButton);
+            try
+            {
+                element.Click();
+            }
+            catch (ElementClickInterceptedException)
+            {
+                ((IJavaScriptExecutor)Driver).ExecuteScript("arguments[0].click();", element);
+            }
+        }
     }
 }

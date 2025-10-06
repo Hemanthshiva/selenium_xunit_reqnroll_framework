@@ -36,9 +36,9 @@ namespace selenium_xunit_reqnroll_framework.Utilities
                 accountInfoPage.FillAddressInfo(firstName, lastName, "TestCo", "123 Main St", "Apt 1", "Canada", "ON", "Toronto", "A1A1A1", "1234567890");
                 accountInfoPage.ClickCreateAccount();
                 var accountCreatedPage = new PageObjects.AccountCreatedPage();
-                if (accountCreatedPage.IsAccountCreatedVisible())
+                if (AccountCreatedPage.IsAccountCreatedVisible())
                 {
-                    accountCreatedPage.ClickContinue();
+                    AccountCreatedPage.ClickContinue();
                 }
                 // Save to DB
                 UserCredentialDb.InsertUser(new UserCredential { Username = username, Email = email, Password = password });

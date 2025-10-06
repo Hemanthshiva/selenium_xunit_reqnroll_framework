@@ -1,4 +1,3 @@
-// ...existing code...
 // Utility for reading configuration from appsettings.json
 using Microsoft.Extensions.Configuration;
 
@@ -26,5 +25,7 @@ namespace selenium_xunit_reqnroll_framework.Utilities
                 return int.Parse(timeoutValue);
             }
         }
+        public static string ChromeDriverVersion => config["ChromeDriverVersion"] ?? "";
+        public static string ChromeDriverPath => config["ChromeDriverPath"] ?? "";
     }
 }

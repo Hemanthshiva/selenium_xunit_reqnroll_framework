@@ -55,3 +55,12 @@ publish/
 
 # Ignore generated SpecFlow/Reqnroll files
 *.feature.cs
+
+# Ignore manually downloaded chromedriver and WebDriverManager cache
+chromedriver.exe
+/WebDriver/
+C:/WebDriver/
+**/chromedriver.exe
+.wdm/
+.wdm/**
+.zencoder/rules/repo.md

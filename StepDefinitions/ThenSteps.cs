@@ -1,3 +1,4 @@
+using OpenQA.Selenium;
 using Reqnroll;
 using selenium_xunit_reqnroll_framework.PageObjects;
 using selenium_xunit_reqnroll_framework.Utilities;
@@ -5,19 +6,15 @@ using selenium_xunit_reqnroll_framework.Utilities;
 namespace selenium_xunit_reqnroll_framework.StepDefinitions
 {
     [Binding]
-    public class ThenSteps
+    public class ThenSteps(ScenarioContext scenarioContext)
     {
         private readonly SignupLoginPage signupLoginPage = new();
         private readonly AccountInfoPage accountInfoPage = new();
-        private readonly AccountCreatedPage accountCreatedPage = new();
-        private readonly AccountDeletedPage accountDeletedPage = new();
         private readonly ContactUsPage contactUsPage = new();
-        private readonly ScenarioContext scenarioContext;
-
-        public ThenSteps(ScenarioContext scenarioContext)
-        {
-            this.scenarioContext = scenarioContext;
-        }
+        private readonly CartPage cartPage = new();
+        private readonly CheckoutPage checkoutPage = new();
+        private readonly PaymentPage paymentPage = new();
+        private readonly ScenarioContext scenarioContext = scenarioContext;
 
         [Then("the page title should contain \"(.*)\"")]
         public static void ThenThePageTitleShouldContain(string expectedTitle)
@@ -33,7 +30,7 @@ namespace selenium_xunit_reqnroll_framework.StepDefinitions
         public void ThenEnterAccountInformationShouldBeVisible() => Assert.True(accountInfoPage.IsEnterAccountInfoVisible());
 
         [Then("Account Created should be visible")]
-        public void ThenAccountCreatedShouldBeVisible() => Assert.True(accountCreatedPage.IsAccountCreatedVisible());
+        public static void ThenAccountCreatedShouldBeVisible() => Assert.True(AccountCreatedPage.IsAccountCreatedVisible());
 
         [Then("Logged in as username should be visible")]
         public void ThenLoggedInAsUsernameShouldBeVisible()
@@ -54,7 +51,7 @@ namespace selenium_xunit_reqnroll_framework.StepDefinitions
         }
 
         [Then("Account Deleted should be visible")]
-        public void ThenAccountDeletedShouldBeVisible() => Assert.True(accountDeletedPage.IsAccountDeletedVisible());
+        public static void ThenAccountDeletedShouldBeVisible() => Assert.True(AccountDeletedPage.IsAccountDeletedVisible());
 
         [Then("Login to your account should be visible")]
         public void ThenLoginToYourAccountShouldBeVisible() => Assert.True(signupLoginPage.IsLoginHeaderVisible());
@@ -78,10 +75,75 @@ namespace selenium_xunit_reqnroll_framework.StepDefinitions
         }
 
         [Then("GET IN TOUCH is visible")]
-        public void ThenGetInTouchIsVisible() => Assert.True(ContactUsPage.IsGetInTouchVisible());
+        public static void ThenGetInTouchIsVisible() => Assert.True(ContactUsPage.IsGetInTouchVisible());
 
         [Then("Success message is visible")]
-        public void ThenSuccessMessageIsVisible() => Assert.True(ContactUsPage.IsSuccessMessageVisible());
+        public static void ThenSuccessMessageIsVisible() => Assert.True(ContactUsPage.IsSuccessMessageVisible());
 
+        [Then("product detail page is opened")]
+        public static void ThenProductDetailPageIsOpened() => Assert.True(ProductDetailPage.IsProductDetailPageVisible());
+
+        [Then("product is displayed in cart page with exact quantity (.*)")]
+        public static void ThenProductIsDisplayedInCartPageWithExactQuantity(int expectedQuantity)
+        {
+            Assert.True(CartPage.IsCartPageVisible(), "Cart page should be visible");
+            Assert.True(CartPage.IsAnyProductDisplayedInCartWithQuantity(expectedQuantity),
+                $"Product should be displayed in cart with quantity {expectedQuantity}");
+        }
+
+        // New steps for Place Order: Register while Checkout
+        [Then("I should see the cart page")]
+        public static void ThenIShouldSeeTheCartPage()
+        {
+            var driver = Utilities.WebDriverManager.Driver;
+            try
+            {
+                var wait = new OpenQA.Selenium.Support.UI.WebDriverWait(driver, TimeSpan.FromSeconds(15));
+                var cartTable = wait.Until(d =>
+                {
+                    var el = d.FindElement(By.Id("cart_info_table"));
+                    return (el != null && el.Displayed) ? el : null;
+                });
+                ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollIntoView({block: 'center', inline: 'center'});", cartTable);
+                Assert.True(cartTable.Displayed, "Cart page should be visible");
+            }
+            catch (Exception)
+            {
+                var screenshot = ((ITakesScreenshot)driver).GetScreenshot();
+                var fileName = $"CartPage_NotVisible_{DateTime.Now:yyyyMMdd_HHmmss}.png";
+                screenshot.SaveAsFile(fileName);
+                throw new Xunit.Sdk.XunitException("Cart page is not visible. Screenshot saved as " + fileName);
+            }
+        }
+
+        [Then("I should see Address Details and Review Your Order")]
+        public static void ThenIShouldSeeAddressDetailsAndReviewYourOrder()
+        {
+            Assert.True(CheckoutPage.IsAddressDetailsVisible(), "Address details should be visible");
+            Assert.True(CheckoutPage.IsOrderReviewVisible(), "Order review should be visible");
+        }
+
+        [Then(@"I should see success message ""(.*)""")]
+        public static void ThenIShouldSeeSuccessMessage(string expectedMessage)
+        {
+            // Take a screenshot for debugging
+            var screenshot = ((ITakesScreenshot)Utilities.WebDriverManager.Driver).GetScreenshot();
+            var fileName = $"success_message_{DateTime.Now:yyyyMMdd_HHmmss}.png";
+            screenshot.SaveAsFile(fileName);
+            Console.WriteLine($"Screenshot saved as {fileName}");
+
+            // Wait a bit to ensure the page has fully loaded
+            Thread.Sleep(2000);
+
+            // Check for the success message
+            Assert.True(PaymentPage.IsSuccessMessageVisible(expectedMessage),
+                $"Success message '{expectedMessage}' should be visible");
+        }
+
+        [Then("I am on the home page")]
+        public static void ThenIAmOnTheHomePage()
+        {
+            Assert.True(HomePage.IsHomePageVisible(), "Home page should be visible");
+        }
     }
 }

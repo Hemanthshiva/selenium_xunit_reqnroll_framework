@@ -2,109 +2,54 @@
 using Allure.Net.Commons;
 using OpenQA.Selenium;
 using Reqnroll;
-using selenium_xunit_reqnroll_framework.Utilities;
+
 
 namespace selenium_xunit_reqnroll_framework.Hooks
 {
     [Binding]
-    public class TestHooks
+    public class TestHooks(ScenarioContext scenarioContext)
     {
-        private readonly ScenarioContext _scenarioContext;
-        private static readonly AllureLifecycle _allure = AllureLifecycle.Instance;
-        private string? _testUuid;
-
-        public TestHooks(ScenarioContext scenarioContext)
-        {
-            _scenarioContext = scenarioContext;
-        }
+        private readonly ScenarioContext _scenarioContext = scenarioContext;
 
         [BeforeTestRun]
         public static void BeforeTestRun()
         {
-            // Initialize Allure results directory
-            var allureResultsPath = Path.Combine(Directory.GetCurrentDirectory(), "allure-results");
+            var projectRoot = GetProjectRoot();
+            var allureResultsPath = Path.Combine(projectRoot, "allure-results");
             Directory.CreateDirectory(allureResultsPath);
-            Console.WriteLine($"Allure results will be generated at: {allureResultsPath}");
+            Environment.SetEnvironmentVariable("ALLURE_RESULTS_DIRECTORY", allureResultsPath);
         }
 
-        [BeforeScenario]
-        public void BeforeScenario()
+        private static string GetProjectRoot()
         {
-            _testUuid = Guid.NewGuid().ToString();
-            var testResult = new TestResult
-            {
-                uuid = _testUuid,
-                name = _scenarioContext.ScenarioInfo.Title,
-                fullName = _scenarioContext.ScenarioInfo.Title,
-                description = _scenarioContext.ScenarioInfo.Description,
-                start = DateTimeOffset.Now.ToUnixTimeMilliseconds()
-            };
-            _allure.StartTestCase(testResult);
+            var directory = new DirectoryInfo(Directory.GetCurrentDirectory());
+            while (directory?.GetFiles("*.csproj").Length == 0)
+                directory = directory.Parent;
+            return directory?.FullName ?? Directory.GetCurrentDirectory();
         }
 
         [AfterStep]
         public void AfterStep()
         {
-            var stepInfo = _scenarioContext.StepContext.StepInfo;
-            var stepType = stepInfo.StepDefinitionType.ToString();
-            var stepText = stepInfo.Text;
-            var error = _scenarioContext.TestError;
-            var stepName = $"{stepType} {stepText}";
-
-            var stepResult = new StepResult
+            if (_scenarioContext.TestError != null)
             {
-                name = stepName,
-                status = error == null ? Status.passed : Status.failed,
-                start = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
-                stop = DateTimeOffset.Now.ToUnixTimeMilliseconds()
-            };
-
-            if (error != null)
-            {
-                stepResult.statusDetails = new StatusDetails { message = error.Message };
-                
-                // Capture screenshot if WebDriver is available
                 try
                 {
-                    var driver = selenium_xunit_reqnroll_framework.Utilities.WebDriverManager.Driver;
-                    if (driver is IWebDriver webDriver)
+                    if (selenium_xunit_reqnroll_framework.Utilities.WebDriverManager.Driver is ITakesScreenshot driver)
                     {
-                        var screenshot = ((ITakesScreenshot)webDriver).GetScreenshot();
+                        var screenshot = driver.GetScreenshot();
                         AllureApi.AddAttachment("Error Screenshot", "image/png", screenshot.AsByteArray);
                     }
                 }
-                catch
-                {
-                    // Continue without screenshot if capture fails
-                }
+                catch { }
             }
-
-            _allure.StartStep(stepResult);
-            _allure.StopStep();
         }
 
         [AfterScenario]
-        public void AfterScenario()
+        public static void AfterScenario()
         {
-            if (_testUuid != null)
-            {
-                var status = _scenarioContext.TestError == null ? Status.passed : Status.failed;
-                _allure.UpdateTestCase(x => {
-                    x.status = status;
-                    x.stop = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-                });
-                _allure.StopTestCase();
-                _allure.WriteTestCase();
-            }
-            
-            try
-            {
-                selenium_xunit_reqnroll_framework.Utilities.WebDriverManager.Quit();
-            }
-            catch
-            {
-                // Suppress any errors during browser cleanup
-            }
+            try { selenium_xunit_reqnroll_framework.Utilities.WebDriverManager.Quit(); }
+            catch { }
         }
 
         [AfterTestRun]

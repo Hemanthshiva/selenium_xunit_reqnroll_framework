@@ -1,0 +1,37 @@
+{
+  "language": {
+    "feature": "en-us"
+  },
+  "bindingCulture": {
+    "name": "en-US"
+  },
+  "runtime": {
+    "stopAtFirstError": false,
+    "missingOrPendingStepsOutcome": "Inconclusive"
+  },
+  "trace": {
+    "traceSuccessfulSteps": true,
+    "traceTimings": false,
+    "minTracedDuration": "0:0:0.1",
+    "stepDefinitionSkeletonStyle": "RegexAttribute"
+  },
+  "stepAssemblies": [
+    {
+      "assembly": "selenium-xunit-reqnroll-framework"
+    }
+  ],
+  "plugins": [
+    {
+      "name": "Reqnroll.xUnit.ReqnrollPlugin"
+    },
+    {
+      "name": "Allure.Reqnroll.ReqnrollPlugin"
+    }
+  ],
+  "generator": {
+    "allowDebugGeneratedFiles": false,
+    "allowRowTests": true,
+    "generateAsyncTests": false,
+    "path": "./Features"
+  }
+}

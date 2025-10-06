@@ -8,8 +8,9 @@ namespace selenium_xunit_reqnroll_framework.StepDefinitions
     [Binding]
     public class GivenSteps
     {
+        private static readonly string[] Titles = ["Mr", "Mrs", "Miss"];
+
         [Given("I am on the home page")]
-        [Then("I am on the home page")]
         public static void GivenIAmOnTheHomePage()
         {
             // Use the correct fully qualified name for WebDriverManager
@@ -32,7 +33,7 @@ namespace selenium_xunit_reqnroll_framework.StepDefinitions
                     Name = faker.Internet.UserName(),
                     Email = faker.Internet.Email(),
                     Password = faker.Internet.Password(8, false, "", "Pass!"),
-                    Title = faker.PickRandom(new[] { "Mr", "Mrs", "Miss" }),
+                    Title = faker.PickRandom(Titles),
                     BirthDate = faker.Random.Int(1, 28).ToString(),
                     BirthMonth = faker.Date.Month(),
                     BirthYear = faker.Random.Int(1970, 2005).ToString(),
