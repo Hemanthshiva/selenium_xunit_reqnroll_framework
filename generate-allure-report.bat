@@ -11,7 +11,7 @@ if not exist "bin\Debug\net8.0\allure-results" (
 
 REM Generate static report
 echo Generating static Allure report...
-powershell -ExecutionPolicy Bypass -Command "allure generate allure-results -o allure-report --clean"
+powershell -ExecutionPolicy Bypass -Command "allure generate 'bin\Debug\net8.0\allure-results' -o allure-report --clean"
 
 if %ERRORLEVEL% EQU 0 (
     echo.

@@ -34,52 +34,55 @@ jobs:
       - name: Run tests
         run: dotnet test selenium-xunit-reqnroll-framework.sln --configuration Release --no-build
 
-      - name: Collect Allure results
-        shell: pwsh
+      - name: Generate Allure HTML report
+        if: always()
+        shell: cmd
         run: |
-          Write-Host "Searching for allure-results directories..."
-          $dest = Join-Path $env:GITHUB_WORKSPACE "allure-results"
-          if (Test-Path $dest) { Remove-Item $dest -Recurse -Force }
-          $found = Get-ChildItem -Path $env:GITHUB_WORKSPACE -Recurse -Directory -Filter "allure-results" -ErrorAction SilentlyContinue
-          if (-not $found) {
-            Write-Error "No allure-results directories found after tests"
-            exit 1
-          }
-          foreach ($d in $found) {
-            Write-Host "Copying from $($d.FullName)"
-            Copy-Item -Path (Join-Path $d.FullName "*") -Destination $dest -Recurse -Force
-          }
-
-      - name: Generate Allure report
-        shell: pwsh
-        run: |
-          $results = Join-Path $env:GITHUB_WORKSPACE "allure-results"
-          $out = Join-Path $env:GITHUB_WORKSPACE "allure-report"
-          if (-Not (Test-Path $results)) { Write-Error "Allure results folder not found: $results"; exit 1 }
-          allure generate $results -o $out --clean
-
-      - name: Verify Allure report
-        shell: pwsh
-        run: |
-          $out = Join-Path $env:GITHUB_WORKSPACE "allure-report"
-          if (-Not (Test-Path $out)) { Write-Error "Allure report not generated"; exit 1 }
-          Write-Host "Allure report generated at $out"
-
-      - name: Upload Allure results artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: allure-results
-          path: allure-results
+          if not exist "bin\Debug\net8.0\allure-results" (
+            echo WARNING: No test results found. Skipping report generation.
+            exit /b 0
+          )
+          allure generate "bin\Debug\net8.0\allure-results" -o allure-report --clean
 
       - name: Upload Allure report artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: allure-report
           path: allure-report
+          if-no-files-found: warn
 
-      - name: Deploy Allure report to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+  deploy-allure:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: always()
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Download Allure report artifact
+        uses: actions/download-artifact@v4
         with:
-          publish_dir: ./allure-report
-          publish_branch: gh-pages
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          name: allure-report
+          path: allure-report
+
+      - name: Verify report exists
+        run: |
+          if [ ! -d allure-report ] || [ ! -f allure-report/index.html ]; then
+            echo "WARNING: Allure report not found or index.html missing"
+            echo "Tests may have failed or no results were generated"
+            exit 0
+          fi
+          echo "✓ Allure report ready for deployment"
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: allure-report
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
