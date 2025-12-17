@@ -1,0 +1,85 @@
+name: .NET Build, Test & Allure
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Setup Node.js (for Allure CLI)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install Allure CLI
+        run: npm install -g allure-commandline --no-fund --silent
+
+      - name: Build solution
+        run: dotnet build selenium-xunit-reqnroll-framework.sln --configuration Release
+
+      - name: Run tests
+        run: dotnet test selenium-xunit-reqnroll-framework.sln --configuration Release --no-build
+
+      - name: Collect Allure results
+        shell: pwsh
+        run: |
+          Write-Host "Searching for allure-results directories..."
+          $dest = Join-Path $env:GITHUB_WORKSPACE "allure-results"
+          if (Test-Path $dest) { Remove-Item $dest -Recurse -Force }
+          $found = Get-ChildItem -Path $env:GITHUB_WORKSPACE -Recurse -Directory -Filter "allure-results" -ErrorAction SilentlyContinue
+          if (-not $found) {
+            Write-Error "No allure-results directories found after tests"
+            exit 1
+          }
+          foreach ($d in $found) {
+            Write-Host "Copying from $($d.FullName)"
+            Copy-Item -Path (Join-Path $d.FullName "*") -Destination $dest -Recurse -Force
+          }
+
+      - name: Generate Allure report
+        shell: pwsh
+        run: |
+          $results = Join-Path $env:GITHUB_WORKSPACE "allure-results"
+          $out = Join-Path $env:GITHUB_WORKSPACE "allure-report"
+          if (-Not (Test-Path $results)) { Write-Error "Allure results folder not found: $results"; exit 1 }
+          allure generate $results -o $out --clean
+
+      - name: Verify Allure report
+        shell: pwsh
+        run: |
+          $out = Join-Path $env:GITHUB_WORKSPACE "allure-report"
+          if (-Not (Test-Path $out)) { Write-Error "Allure report not generated"; exit 1 }
+          Write-Host "Allure report generated at $out"
+
+      - name: Upload Allure results artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results
+          path: allure-results
+
+      - name: Upload Allure report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report
+          path: allure-report
+
+      - name: Deploy Allure report to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          publish_dir: ./allure-report
+          publish_branch: gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}
