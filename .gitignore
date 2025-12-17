@@ -1,66 +1,58 @@
-# Ignore build output
-bin/
-obj/
+# Build results
+[Bb]in/
+[Oo]bj/
 
-# Ignore user secrets and local settings
+# Visual Studio 2015/2017/2019/2022 cache/options directory
+.vs/
 *.user
-*.suo
 *.userosscache
 *.sln.docstates
+*.suo
 
-# Ignore test results
+# Test results
 TestResults/
+[Tt]est[Rr]esults/
 
-# Ignore database files
-usercredentials.db
-*.db
-*.sqlite
-
-# Ignore logs
-*.log
-
-# Ignore VS Code settings
-.vscode/
-.vs
-
-# Ignore Rider settings
-.idea/
-
-# Ignore ReSharper files
-*.DotSettings.user
-
-# Ignore NuGet packages
-*.nupkg
-packages/
-
-# Ignore coverage reports
-coverage/
-*.coverage
-*.coveragexml
-
-# Ignore Allure reports and results
+# Allure
 allure-results/
 allure-report/
 
-# Ignore other temp files
-~$*
+# Database
+*.db
+*.sqlite
+*.db-shm
+*.db-wal
+
+# Logs
+*.log
+
+# NuGet
+*.nupkg
+packages/
+*.lock.json
+
+# Rider / JetBrains
+.idea/
+*.DotSettings.user
+
+# VS Code
+.vscode/
+
+# SpecFlow / Reqnroll
+*.feature.cs
+
+# Selenium / WebDriver
+chromedriver.exe
+geckodriver.exe
+msedgedriver.exe
+IEDriverServer.exe
+/WebDriver/
+.wdm/
+
+# Misc
 *.tmp
 *.bak
 *.swp
-*.swn
-*.swo
-
-# Ignore publish output
-publish/
-
-# Ignore generated SpecFlow/Reqnroll files
-*.feature.cs
-
-# Ignore manually downloaded chromedriver and WebDriverManager cache
-chromedriver.exe
-/WebDriver/
-C:/WebDriver/
-**/chromedriver.exe
-.wdm/
-.wdm/**
-.zencoder/rules/repo.md
+*~
+Thumbs.db
+.DS_Store

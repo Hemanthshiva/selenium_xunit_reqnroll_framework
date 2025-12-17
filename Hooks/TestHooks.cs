@@ -4,8 +4,8 @@ using OpenQA.Selenium;
 using Reqnroll;
 
 
-namespace selenium_xunit_reqnroll_framework.Hooks
-{
+namespace selenium_xunit_reqnroll_framework.Hooks;
+
     [Binding]
     public class TestHooks(ScenarioContext scenarioContext)
     {
@@ -14,19 +14,11 @@ namespace selenium_xunit_reqnroll_framework.Hooks
         [BeforeTestRun]
         public static void BeforeTestRun()
         {
-            var projectRoot = GetProjectRoot();
-            var allureResultsPath = Path.Combine(projectRoot, "allure-results");
-            Directory.CreateDirectory(allureResultsPath);
-            Environment.SetEnvironmentVariable("ALLURE_RESULTS_DIRECTORY", allureResultsPath);
+            // Allure lifecycle is managed by the Allure.Reqnroll plugin.
+            // Configuration is read from allureConfig.json in the output directory.
         }
 
-        private static string GetProjectRoot()
-        {
-            var directory = new DirectoryInfo(Directory.GetCurrentDirectory());
-            while (directory?.GetFiles("*.csproj").Length == 0)
-                directory = directory.Parent;
-            return directory?.FullName ?? Directory.GetCurrentDirectory();
-        }
+
 
         [AfterStep]
         public void AfterStep()
@@ -58,4 +50,4 @@ namespace selenium_xunit_reqnroll_framework.Hooks
             Console.WriteLine("Test run completed. Allure results generated.");
         }
     }
-}
+

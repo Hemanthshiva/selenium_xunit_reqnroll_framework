@@ -22,10 +22,10 @@
   ],
   "plugins": [
     {
-      "name": "Reqnroll.xUnit.ReqnrollPlugin"
+      "name": "Reqnroll.xUnit"
     },
     {
-      "name": "Allure.Reqnroll.ReqnrollPlugin"
+      "name": "Allure"
     }
   ],
   "generator": {
