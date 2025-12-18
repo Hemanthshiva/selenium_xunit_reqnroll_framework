@@ -4,6 +4,16 @@ on:
   push:
     branches: [ "main" ]
   workflow_dispatch:
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
 
 jobs:
   build-and-test:
@@ -32,7 +42,7 @@ jobs:
         run: dotnet build selenium-xunit-reqnroll-framework.sln --configuration Release
 
       - name: Run tests
-        run: dotnet test selenium-xunit-reqnroll-framework.sln --configuration Release --no-build
+        run: dotnet test selenium-xunit-reqnroll-framework.sln --configuration Release --no-build --logger "trx;logfilename=test-results.trx"
 
       - name: Generate Allure HTML report
         if: always()
