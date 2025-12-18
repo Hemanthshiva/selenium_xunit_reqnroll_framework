@@ -3,7 +3,7 @@ echo Generating Allure Report...
 echo.
 
 REM Check if allure-results directory exists
-if not exist "bin\Debug\net8.0\allure-results" (
+if not exist "bin\Release\net8.0\allure-results" (
     echo Error: No test results found. Please run tests first using 'dotnet test'
     pause
     exit /b 1
@@ -11,7 +11,7 @@ if not exist "bin\Debug\net8.0\allure-results" (
 
 REM Generate static report
 echo Generating static Allure report...
-powershell -ExecutionPolicy Bypass -Command "allure generate 'bin\Debug\net8.0\allure-results' -o allure-report --clean"
+powershell -ExecutionPolicy Bypass -Command "allure generate 'bin\Release\net8.0\allure-results' -o allure-report --clean"
 
 if %ERRORLEVEL% EQU 0 (
     echo.

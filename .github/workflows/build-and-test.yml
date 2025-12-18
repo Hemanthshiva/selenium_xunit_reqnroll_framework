@@ -38,11 +38,11 @@ jobs:
         if: always()
         shell: cmd
         run: |
-          if not exist "bin\Debug\net8.0\allure-results" (
+          if not exist "bin\Release\net8.0\allure-results" (
             echo WARNING: No test results found. Skipping report generation.
             exit /b 0
           )
-          allure generate "bin\Debug\net8.0\allure-results" -o allure-report --clean
+          allure generate "bin\Release\net8.0\allure-results" -o allure-report --clean
 
       - name: Upload Allure report artifact
         if: always()
