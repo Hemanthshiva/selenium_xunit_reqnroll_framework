@@ -210,6 +210,31 @@ If reports are blank:
 2. Ensure `Allure.Reqnroll` plugin is correctly configured in `reqnroll.json`.
 3. Verify `allure-results` folder contains `.json` files after test execution.
 
+## 🔄 CI/CD Pipeline
+
+The project is configured with a **GitHub Actions** workflow that automatically builds, tests, and generates reports on every push to the `main` branch.
+
+### Workflow Overview
+The pipeline defined in `.github/workflows/build-and-test.yml` performs the following steps:
+
+1.  **Build & Test** (Windows Environment):
+    *   Sets up .NET 8 and Node.js
+    *   Installs Allure CLI
+    *   Builds the solution in Release mode
+    *   Executes all tests using `dotnet test`
+2.  **Report Generation**:
+    *   Generates a static Allure HTML report from the test results
+    *   Uploads the report as a workflow artifact
+3.  **Deployment** (Ubuntu Environment):
+    *   Downloads the generated report
+    *   Deploys the report to **GitHub Pages**
+
+### Accessing CI Reports
+Once the pipeline completes successfully, the latest test report is automatically published to GitHub Pages:
+
+1.  Navigate to your repository's **Settings** > **Pages** to see the live URL.
+2.  The URL format is: `https://hemanthshiva.github.io/selenium_xunit_reqnroll_framework/`
+
 ## 📝 Test Scenarios
 
 ### Contact Us Feature
