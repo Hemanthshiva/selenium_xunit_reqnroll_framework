@@ -232,8 +232,7 @@ The pipeline defined in `.github/workflows/build-and-test.yml` performs the foll
 ### Accessing CI Reports
 Once the pipeline completes successfully, the latest test report is automatically published to GitHub Pages:
 
-1.  Navigate to your repository's **Settings** > **Pages** to see the live URL.
-2.  The URL format is: `https://hemanthshiva.github.io/selenium_xunit_reqnroll_framework/`
+1.  Navigate to your repository's URL: `https://hemanthshiva.github.io/selenium_xunit_reqnroll_framework/`
 
 ## 📝 Test Scenarios
 
